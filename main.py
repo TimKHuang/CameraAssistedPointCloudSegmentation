@@ -1,5 +1,4 @@
 import os
-
 import cv2
 
 from preparation.odometryDataset import Dataset
