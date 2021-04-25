@@ -1,6 +1,5 @@
 import pykitti
 import os
-import shutil
 
 
 class Dataset:
@@ -8,11 +7,23 @@ class Dataset:
     def __init__(self, store_path = None):
         if store_path is None:
             store_path = os.path.curdir
-        self.path = os.path.join(store_path, "temp")
+        self.path = os.path.abspath(os.path.join(store_path, "temp"))
         os.mkdir(self.path)
 
         self.sequence_path = os.path.join(self.path, "sequences")
         os.mkdir(self.sequence_path)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    @staticmethod
+    def open_odometry(calibration, store_path=None, grayscale=None, color=None, velodyne=None):
+        dataset = Dataset(store_path=store_path)
+        dataset.prepare_odometry(calibration, grayscale=grayscale, color=color, velodyne=velodyne)
+        return dataset
 
     def prepare_odometry(self, calibration, grayscale=None, color=None, velodyne=None):
         self._load_calib(calibration)
@@ -26,7 +37,7 @@ class Dataset:
         if velodyne is not None:
             self._load_velodyne(velodyne)
 
-    def get_odometry(self, sequence):
+    def get_sequence(self, sequence):
         return pykitti.odometry(self.path, sequence)
 
     def close(self):
@@ -42,6 +53,7 @@ class Dataset:
 
         os.rmdir(self.sequence_path)
         os.rmdir(self.path)
+        print("Temporary Folder Deleted")
 
     def _load_calib(self, calibration):
         with os.scandir(os.path.join(calibration, "sequences")) as entries:
@@ -82,14 +94,12 @@ class Dataset:
 
 
 if __name__ == '__main__':
-    dataset = Dataset()
-    calib = os.path.join(os.path.pardir, "dataset", "calibration")
-    color = os.path.join(os.path.pardir, "dataset", "color")
-    velodyne = os.path.join(os.path.pardir, "dataset", "velodyne")
-    dataset.prepare_odometry(calib, color=color, velodyne=velodyne)
+    calib = os.path.join(os.path.pardir, os.path.pardir, "dataset", "calibration")
+    color = os.path.join(os.path.pardir, os.path.pardir, "dataset", "color")
+    velodyne = os.path.join(os.path.pardir, os.path.pardir, "dataset", "velodyne")
 
-    odometry = dataset.get_odometry("00")
-    print(odometry.sequence)
-    print(odometry.get_cam2(2))
+    with Dataset.open_odometry(calib, color=color, velodyne=velodyne) as dataset:
+        sequence = dataset.get_sequence("00")
 
-    dataset.close()
+        print(sequence.get_velo(0).shape)
+        print(sequence.calib.T_cam2_velo)
