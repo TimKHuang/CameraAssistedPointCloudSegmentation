@@ -20,12 +20,12 @@ class Dataset:
         self.close()
 
     @staticmethod
-    def open_odometry(calibration, store_path=None, grayscale=None, color=None, velodyne=None):
+    def open_odometry(calibration, store_path=None, grayscale=None, color=None, velodyne=None, label=None):
         dataset = Dataset(store_path=store_path)
-        dataset.prepare_odometry(calibration, grayscale=grayscale, color=color, velodyne=velodyne)
+        dataset.prepare_odometry(calibration, grayscale=grayscale, color=color, velodyne=velodyne, label=label)
         return dataset
 
-    def prepare_odometry(self, calibration, grayscale=None, color=None, velodyne=None):
+    def prepare_odometry(self, calibration, grayscale=None, color=None, velodyne=None, label=None):
         self._load_calib(calibration)
 
         if grayscale is not None:
@@ -36,6 +36,9 @@ class Dataset:
 
         if velodyne is not None:
             self._load_velodyne(velodyne)
+        
+        if label is not None:
+            self._load_label(label)
 
     def get_sequence(self, sequence):
         return pykitti.odometry(self.path, sequence)
@@ -92,11 +95,25 @@ class Dataset:
                 target = os.path.join(entry_path, "velodyne")
                 os.symlink(source, target)
 
+    def _load_label(self, label):
+        with os.scandir(os.path.join(label, "sequences")) as entries:
+            for entry in entries:
+                entry_path = os.path.join(self.sequence_path, entry.name)
+
+                label_source = os.path.abspath(os.path.join(entry.path, "labels"))
+                label_target = os.path.join(entry_path, "labels")
+                os.symlink(label_source, label_target)
+                
+                poses_source = os.path.abspath(os.path.join(entry.path, "poses.txt"))
+                poses_target = os.path.join(entry_path, "poses.txt")
+                os.symlink(poses_source, poses_target)
+
 
 if __name__ == '__main__':
     calib = os.path.join(os.path.pardir, os.path.pardir, "dataset", "calibration")
     color = os.path.join(os.path.pardir, os.path.pardir, "dataset", "color")
     velodyne = os.path.join(os.path.pardir, os.path.pardir, "dataset", "velodyne")
+    label = os.path.join(os.path.pardir, os.path.pardir, "dataset", "label")
 
     with Dataset.open_odometry(calib, color=color, velodyne=velodyne) as dataset:
         sequence = dataset.get_sequence("00")

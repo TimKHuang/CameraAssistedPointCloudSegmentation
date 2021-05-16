@@ -10,13 +10,14 @@ from visualisation.image import show_image, plot_point_on_image
 calibration = os.path.join(os.path.pardir, "dataset", "calibration")
 color = os.path.join(os.path.pardir, "dataset", "color")
 velodyne = os.path.join(os.path.pardir, "dataset", "velodyne")
+label = os.path.join(os.path.pardir, "dataset", "label")
 
 # Field of view
 v_fov = (-24.9, 2.0)
 h_fov = (-45, 45)
 
 if __name__ == '__main__':
-    with Dataset.open_odometry(calibration, color=color,  velodyne=velodyne) as dataset:
+    with Dataset.open_odometry(calibration, color=color,  velodyne=velodyne, label=label) as dataset:
         seq = dataset.get_sequence("00")
         index = 0
 
