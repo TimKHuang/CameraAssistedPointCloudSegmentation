@@ -1,2 +1,3 @@
-pykitti
-opencv-python
+pykitti~=0.3.1
+opencv-python~=4.5.2.52
+numpy~=1.20.3
