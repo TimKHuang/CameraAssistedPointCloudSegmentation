@@ -1,7 +1,7 @@
 import os
 
 
-def generate(path, calibration, color=None, velodyne=None, label=None):
+def generate(path, calibration, color=None, velodyne=None, semantic=None):
     sequence_path = os.path.join(path, "sequences")
     os.mkdir(path)
     os.mkdir(sequence_path)
@@ -14,23 +14,33 @@ def generate(path, calibration, color=None, velodyne=None, label=None):
     if velodyne is not None:
         _load_velodyne(sequence_path, velodyne)
 
-    if label is not None:
-        _load_label(sequence_path, label)
+    if semantic is not None:
+        _load_semantic(sequence_path, semantic)
 
 
 def delete(path):
+    # delete sequence
     sequence_path = os.path.join(path, "sequences")
-    with os.scandir(sequence_path) as entries:
-        for entry in entries:
-            entry_path = os.path.join(sequence_path, entry.name)
+    if os.path.exists(sequence_path):
+        with os.scandir(sequence_path) as entries:
+            for entry in entries:
+                entry_path = os.path.join(sequence_path, entry.name)
 
-            with os.scandir(entry_path) as symlinks:
-                for link in symlinks:
-                    os.unlink(link.path)
+                with os.scandir(entry_path) as symlinks:
+                    for link in symlinks:
+                        os.unlink(link.path)
 
-            os.rmdir(entry_path)
+                os.rmdir(entry_path)
+        os.rmdir(sequence_path)
 
-    os.rmdir(sequence_path)
+    # delete poses
+    poses_path = os.path.join(path, "poses")
+    if os.path.exists(poses_path):
+        with os.scandir(poses_path) as entries:
+            for entry in entries:
+                os.unlink(entry.path)
+        os.rmdir(poses_path)
+
     os.rmdir(path)
 
 
@@ -71,8 +81,11 @@ def _load_velodyne(sequence_path, velodyne):
             os.symlink(source, target)
 
 
-def _load_label(sequence_path, label):
-    with os.scandir(os.path.join(label, "sequences")) as entries:
+def _load_semantic(sequence_path, semantic):
+    poses_path = os.path.join(sequence_path, os.pardir, "poses")
+    os.mkdir(poses_path)
+
+    with os.scandir(os.path.join(semantic, "sequences")) as entries:
         for entry in entries:
             entry_path = os.path.join(sequence_path, entry.name)
 
@@ -82,14 +95,16 @@ def _load_label(sequence_path, label):
 
             poses_source = os.path.abspath(os.path.join(entry.path, "poses.txt"))
             poses_target = os.path.join(entry_path, "poses.txt")
+            poses_folder_target = os.path.join(poses_path, "{}.txt".format(entry.name))
             os.symlink(poses_source, poses_target)
+            os.symlink(poses_source, poses_folder_target)
 
 
 if __name__ == '__main__':
-    calib_file = os.path.join(os.path.pardir, os.path.pardir, "dataset", "calibration")
-    color_file = os.path.join(os.path.pardir, os.path.pardir, "dataset", "color")
-    velodyne_file = os.path.join(os.path.pardir, os.path.pardir, "dataset", "velodyne")
-    label_file = os.path.join(os.path.pardir, os.path.pardir, "dataset", "label")
+    calib_file = os.path.join(os.curdir, "dataset", "calibration")
+    color_file = os.path.join(os.curdir, "dataset", "color")
+    velodyne_file = os.path.join(os.curdir, "dataset", "velodyne")
+    semantic_file = os.path.join(os.curdir, "dataset", "semantic")
 
-    # generate("dataset", calib_file, color=color_file, velodyne=velodyne_file, label=label_file)
+    # generate("dataset", calib_file, color=color_file, velodyne=velodyne_file, semantic=semantic_file)
     delete("dataset")
