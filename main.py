@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from preparation.dataset import generate, delete
-from projection.project import points2image_project
+from projection.project import points2image_project, frame2frame_project
 from visualisation.image import show_image, plot_point_on_image
 
 # The Path to the downloaded odometry file
@@ -26,13 +26,14 @@ if __name__ == '__main__':
         generate(dataset, calibration=calibration, color=color, velodyne=velodyne, semantic=semantic)
 
     seq = pykitti.odometry(dataset, "00")
-    index = 0
+    index = 5
 
-    print(seq.poses[0])
-    img = np.array(seq.get_cam2(index))
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    for i in range(10):
+        points = frame2frame_project(seq.get_velo(i), seq.poses[i], seq.poses[5], seq.calib.T_cam0_velo)
+        img = np.array(seq.get_cam2(index))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    xyz_selected, xy_projected = points2image_project(seq, index, v_fov, h_fov)
+        xyz_selected, xy_projected = points2image_project(points, seq.calib, v_fov, h_fov)
 
-    show_image("Projected Image", plot_point_on_image(img, xyz_selected, xy_projected))
+        show_image("Projected Image", plot_point_on_image(img, xyz_selected, xy_projected))
 
