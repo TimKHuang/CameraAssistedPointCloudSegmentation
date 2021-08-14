@@ -6,7 +6,7 @@ import numpy as np
 from preparation.dataset import generate, delete
 from projection.project import points2image_project, frame2frame_project
 from visualisation.image import show_image, plot_point_on_image
-from prediction.predict import Predictor, predict
+from prediction.predict import Predictor 
 
 # The Path to the downloaded odometry file
 pardir = r"/mnt"

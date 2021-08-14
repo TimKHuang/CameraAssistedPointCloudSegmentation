@@ -39,6 +39,8 @@ from optimizer import restore_snapshot
 from datasets import kitti
 from config import assert_and_infer_cfg
 
+sys.path.append(os.path.dirname(__file__))
+from kitti_labels import cityscapes2kitti
 
 class Predictor:
 
@@ -82,4 +84,10 @@ class Predictor:
         pred = pred.cpu().numpy().squeeze()
         pred = np.argmax(pred, axis=0)
 
-        return pred
+        return Predictor.city2kitti_translate(pred)
+
+    @staticmethod
+    def city2kitti_translate(labels):
+        return np.array([
+            [ cityscapes2kitti[i] for i in row ] for row in labels
+        ])
