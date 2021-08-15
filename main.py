@@ -33,7 +33,7 @@ if __name__ == '__main__':
     for i in range(10):
         points = frame2frame_project(seq.get_velo(i), seq.poses[i], seq.poses[5], seq.calib.T_cam0_velo)
         img = np.array(seq.get_cam2(index))
-        print(predictor.predict(img))
+        pred = predictor.predict(img)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
 

@@ -91,3 +91,28 @@ class Predictor:
         return np.array([
             [ cityscapes2kitti[i] for i in row ] for row in labels
         ])
+        
+
+if __name__ == '__main__':
+
+    if len(sys.argv) < 3:
+        raise("Missing image or the pretrained model")
+    import cv2
+
+    snapshot = sys.argv[1]
+    img = sys.argv[2]
+    img = cv2.cvtColor(cv2.imread(img), cv2.COLOR_BGR2RGB)
+
+    predictor = Predictor(snapshot)
+    pred = predictor.predict(img)
+    print(pred)
+
+    if not len(sys.argv) > 3:
+        exit(0)
+    
+    from kitti_labels import kitti_colors
+    output = sys.argv[3]
+    colored_img = np.array([
+        [kitti_colors[l] for l in row] for row in pred
+    ])
+    cv2.imwrite(output, colored_img)
