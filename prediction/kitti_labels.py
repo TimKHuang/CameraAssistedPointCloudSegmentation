@@ -72,7 +72,7 @@ cityscapes2kitti = {
     9           :           72      ,       #   terrain
     10          :           1       ,       #   sky             ->  outlier
     11          :           30      ,       #   person
-    12          :           31      ,       #   rider           -> bicyclist ( TODO what about motorcylist)
+    12          :           31      ,       #   rider           -> bicyclist
     13          :           10      ,       #   car
     14          :           18      ,       #   truck
     15          :           13      ,       #   bus

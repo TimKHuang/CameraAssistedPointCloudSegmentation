@@ -1,7 +1,12 @@
 import numpy as np
 
 
-def _in_view_points(origin_points, v_fov, h_fov):
+# Field of view
+v_fov = (-24.9, 2.0)
+h_fov = (-45, 45)
+
+
+def _in_view_points(origin_points):
     x = origin_points[:, 0]
     y = origin_points[:, 1]
     z = origin_points[:, 2]
@@ -23,13 +28,11 @@ def _in_view_points(origin_points, v_fov, h_fov):
     return xyz
 
 
-def points2image_project(points, calib, v_fov, h_fov):
+def points2image_project(points, calib):
     """" project points in velo onto the image
 
     :param points: The velodyne data
     :param calib: The sequence calibration data
-    :param v_fov: vertical field of view
-    :param h_fov: horizontal field of view
 
     :return velo, image: the in range points and its coordinates on image
     """
@@ -37,7 +40,7 @@ def points2image_project(points, calib, v_fov, h_fov):
     velo_to_camera = calib.T_cam2_velo
     camera_to_image = calib.K_cam2
 
-    velo = _in_view_points(points, v_fov, h_fov)
+    velo = _in_view_points(points)
 
     camera = velo_to_camera @ velo
     camera = np.delete(camera, 3, axis=0)
