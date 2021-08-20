@@ -2,6 +2,14 @@ import os
 
 
 def generate(path, calibration, color=None, velodyne=None, semantic=None):
+    """ generate symbolic links that links file in different location to fit the required structure
+
+    :param path: the path to stored the symlinks
+    :param calibration: the path to the calibration files
+    :param color: the path to the colored image files
+    :param velodyne: the path to the velodyne files
+    :param semantic: the path to the semantic kitti files
+    """
     sequence_path = os.path.join(path, "sequences")
     os.mkdir(path)
     os.mkdir(sequence_path)
@@ -19,6 +27,10 @@ def generate(path, calibration, color=None, velodyne=None, semantic=None):
 
 
 def delete(path):
+    """ delete the generated symbolic links
+
+    :param path: the path to the directory of the symlinks
+    """
     # delete sequence
     sequence_path = os.path.join(path, "sequences")
     if os.path.exists(sequence_path):

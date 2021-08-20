@@ -225,4 +225,4 @@ cython_debug/
 # Dataset
 dataset
 dataset/*
-prediction/*.pth
+img/*.pth

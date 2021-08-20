@@ -22,12 +22,13 @@ Source License
 # OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 """
 import numpy as np
-from PIL import Image
 from types import SimpleNamespace
+
 
 import torch
 from torch.backends import cudnn
 import torchvision.transforms as transforms
+
 
 import os
 import sys
@@ -42,7 +43,8 @@ from config import assert_and_infer_cfg
 sys.path.append(os.path.dirname(__file__))
 from kitti_labels import cityscapes2kitti
 
-class Predictor:
+
+class ImagePredictor:
 
     def __init__(self, snapshot, arch='network.deepv3.DeepWV3Plus'):
         self._process_args(snapshot, arch)
@@ -79,12 +81,11 @@ class Predictor:
         with torch.no_grad():
             img = img_tensor.unsqueeze(0).cuda()
             pred = self.net(img)
-            print('Inference done')
         
         pred = pred.cpu().numpy().squeeze()
         pred = np.argmax(pred, axis=0)
 
-        return Predictor.city2kitti_translate(pred)
+        return ImagePredictor.city2kitti_translate(pred)
 
     @staticmethod
     def city2kitti_translate(labels):
@@ -103,7 +104,7 @@ if __name__ == '__main__':
     img = sys.argv[2]
     img = cv2.cvtColor(cv2.imread(img), cv2.COLOR_BGR2RGB)
 
-    predictor = Predictor(snapshot)
+    predictor = ImagePredictor(snapshot)
     pred = predictor.predict(img)
     print(pred)
 

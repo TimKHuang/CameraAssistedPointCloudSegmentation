@@ -1,4 +1,4 @@
-[submodule "prediction/NVIDIA"]
-	path = prediction/NVIDIA
+[submodule "img/NVIDIA"]
+	path = img/NVIDIA
 	url = https://github.com/NVIDIA/semantic-segmentation
 	branch = sdcnet

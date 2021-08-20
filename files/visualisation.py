@@ -23,8 +23,3 @@ def plot_point_on_image(image, xyz_origin, xy_projected):
 
     result = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
     return result
-
-
-def show_image(title, image):
-    cv2.imshow(title, image)
-    cv2.waitKey(0)
