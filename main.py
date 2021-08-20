@@ -24,6 +24,10 @@ sequence = 0
 # The path to the pretrained image semantic segmentation model
 pretrained_model = r"/mnt/autodriving/prediction/kitti_best.pth"
 
+# The path of the output dir
+output_dir = r"/mnt/test/sequences" + f"/{sequence:02d}"
+
+
 # co-predict image number
 img_count = 5
 
@@ -56,7 +60,7 @@ for velo, img, pose in zip(seq.velo, seq.cam2, seq.poses):
     for i in range(velo_xyz.shape[1]):
 
         try:
-            label = img_labels[np.int32(img_xy[0][i]), np.int32(img_xy[1][i])]
+            label = img_labels[np.int32(img_xy[1][i]), np.int32(img_xy[0][i])]
         except IndexError:
             continue
 
@@ -75,7 +79,7 @@ for velo, img, pose in zip(seq.velo, seq.cam2, seq.poses):
 
         for i in range(pre_velo_xyz.shape[1]):
             try:
-                label = prelabel[np.int32(pre_img_xy[0][i]), np.int32(pre_img_xy[1][i])]
+                label = prelabel[np.int32(pre_img_xy[1][i]), np.int32(pre_img_xy[0][i])]
             except IndexError:
                 continue
 
@@ -97,7 +101,8 @@ for velo, img, pose in zip(seq.velo, seq.cam2, seq.poses):
         final_pred.append(mode(value))
 
     final_pred = np.array(final_pred, dtype=np.int32)
-    final_pred.tofile('test.pred') # TODO output to file
+    final_pred.tofile(output_dir + f"/{index:06d}.label") # TODO output to file
+    print("Finish " + str(index))
 
     previous_img_labels.append(img_labels)
     previous_poses.append(pose)
