@@ -36,9 +36,15 @@
 import logging
 import torch
 import torch.nn as nn
+import torchvision.transforms as transforms
 from apex import amp
 from functools import partial
 from collections import OrderedDict
+
+
+mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+img_transform = transforms.Compose(
+    [transforms.ToTensor(), transforms.Normalize(*mean_std)])
 
 
 def bnrelu(channels):
@@ -396,7 +402,8 @@ class DeepWV3Plus(nn.Module):
               (1024, 2048, 4096)]
     """
 
-    def __init__(self, num_classes, trunk='WideResnet38', is_feature_extractor=False):
+    def __init__(self, num_classes=19, trunk='WideResnet38', is_feature_extractor=False):
+        # 19 is the num_classes of citycapes dataset
 
         super(DeepWV3Plus, self).__init__()
         logging.info("Trunk: %s", trunk)
