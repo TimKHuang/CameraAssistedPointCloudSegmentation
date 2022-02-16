@@ -1,14 +1,14 @@
-from ast import Index
 import os
-from matplotlib.pyplot import axis
-from sklearn.pipeline import FeatureUnion
-import torch
 import pykitti
 import numpy as np
-from collections import deque
+import torch
+from torch.utils.data import Dataset, DataLoader
+import torch.nn as nn
+import torch.nn.functional as F
 
 from deepwv3plus_net import DeepWV3Plus, img_transform
 from project import points2image_project, frame2frame_project
+from kitti_labels import kitti_label2learning
 
 
 def generate_dataset(
@@ -16,7 +16,7 @@ def generate_dataset(
         save_dir,
         kitti_dir,
         weights_addr,
-        dataset_size=100000,
+        dataset_size=10000,
         num_prev=3):
     '''
     sequence: array like structure containing string of sequence.
@@ -144,13 +144,34 @@ def generate_dataset(
             # Everyone else has at least one projected feature
             project_times_count[len(f) - 1] += 1
             feature = np.mean(f, axis=0)
-            np.append(feature, label_dict[k])
+            feature = np.append(feature, np.float32(label_dict[k]))
             np.save(os.path.join(save_dir, f"{current_datasize:08d}"), feature)
 
             current_datasize += 1
             if current_datasize % (dataset_size // 5) == 0:
                 print(f"{current_datasize} / {dataset_size} data added.")
-                print(f"Including {project_times_count} of different projections")
+                print(
+                    f"Including {project_times_count} of different projections")
 
     print(f"{current_datasize} / {dataset_size} data added.")
     print(f"Including {project_times_count} of different projections")
+
+
+class FeatureDB(Dataset):
+
+    def __init__(self, dataset_dir) -> None:
+        super().__init__()
+        self.dataset_dir = dataset_dir
+
+    def __len__(self):
+        return len(os.listdir(self.dataset_dir))
+
+    def __getitem__(self, index):
+        raw = np.load(os.path.join(self.dataset_dir, f"{index:08d}.npy"))
+        features = raw[:-1]
+        label = int(raw[-1]) & 0xFFFF
+        label = kitti_label2learning[label]
+        return (
+            torch.tensor(features, dtype=torch.float),
+            torch.tensor(label, dtype=torch.long)
+        )
