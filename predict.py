@@ -1,7 +1,6 @@
 import numpy as np
 from statistics import mode
 
-from ast import expr_context
 from project import points2image_project, frame2frame_project
 
 
