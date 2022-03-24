@@ -44,7 +44,6 @@ def generate_dataset(
     ]
 
     current_datasize = 0
-    project_times_count = np.zeros((num_prev + 1, ))
     while current_datasize < dataset_size:
         # Random sequence
         seq = np.random.randint(0, len(sequence))
@@ -98,7 +97,7 @@ def generate_dataset(
             feature_dict[key].append(feature)
 
         # Previous Frame Projection
-        for p in range(num_prev):
+        for p in range(1, num_prev):
             pre_xyz = frame2frame_project(
                 velo,
                 kitti.poses[index],
@@ -138,11 +137,9 @@ def generate_dataset(
 
         for k, f in feature_dict.items():
             # It has not been mapped to any image
-            if len(f) == 0:
+            if len(f) != num_prev:
                 continue
 
-            # Everyone else has at least one projected feature
-            project_times_count[len(f) - 1] += 1
             feature = np.mean(f, axis=0)
             feature = np.append(feature, np.float32(label_dict[k]))
             np.save(os.path.join(save_dir, f"{current_datasize:08d}"), feature)
@@ -150,11 +147,8 @@ def generate_dataset(
             current_datasize += 1
             if current_datasize % (dataset_size // 5) == 0:
                 print(f"{current_datasize} / {dataset_size} data added.")
-                print(
-                    f"Including {project_times_count} of different projections")
 
     print(f"{current_datasize} / {dataset_size} data added.")
-    print(f"Including {project_times_count} of different projections")
 
 
 class FeatureDB(Dataset):
