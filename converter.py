@@ -4,18 +4,18 @@ class Converter:
     """
     Class to convert points between different coordinate systems
 
-    Attributes
-    ----------
-    calib : 
-
     Methods
     -------
     set_fov :
         set the vertical and horizontal field of view
+    in_view_point :
+        return the mask of the points that are in the field of view
     lidar_to_image :
         Convert lidar points to image pixels of the same frame
     lidar_to_lidar:
         Convert lidar points from one frame to another
+    lidar_to_target_image:
+        return mask and target image pixels of current lidar points
     """
 
     def __init__(self, calib):
@@ -80,4 +80,14 @@ class Converter:
         target_points[:, 3] = remissions
 
         return target_points
+    
+
+    def lidar_to_target_image(self, source_points, source_pose, target_pose):
+
+        target_points = self.lidar_to_lidar(source_points, source_pose, target_pose)
+
+        target_mask = self.in_view_point(target_points)
+        target_image = self.lidar_to_image(target_points)
+
+        return target_mask, target_image
 
